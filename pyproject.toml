@@ -1,0 +1,47 @@
+[build-system]
+requires = ["hatchling>=1.25,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "local-face-recognition"
+version = "0.1.0"
+description = "Privacy-first local face recognition for consent-based photo collections"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Fayadh Kader" }]
+dependencies = [
+  "numpy>=1.26,<3",
+  "opencv-python>=4.10,<5",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.10,<2",
+  "pytest>=8.2,<9",
+  "pytest-cov>=5,<7",
+  "ruff>=0.5,<1",
+]
+
+[project.scripts]
+face-recognition = "face_recognition.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/face_recognition"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers --strict-config"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "RUF"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["face_recognition"]
+
