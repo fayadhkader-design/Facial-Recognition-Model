@@ -29,5 +29,7 @@ jobs:
         run: ruff check .
       - name: Type check
         run: mypy src
+      - name: Audit tracked files
+        run: python scripts/security_audit.py
       - name: Test
         run: pytest --cov=face_recognition --cov-report=term-missing
