@@ -48,3 +48,8 @@ def test_detector_rejects_empty_image() -> None:
 def test_detector_requires_model_file(tmp_path: Path) -> None:
     with pytest.raises(ModelError, match="not found"):
         FaceDetector(tmp_path / "missing.onnx")
+
+
+def test_detector_rejects_invalid_threshold(tmp_path: Path) -> None:
+    with pytest.raises(ModelError, match="between 0 and 1"):
+        FaceDetector(tmp_path / "missing.onnx", confidence_threshold=1.1)

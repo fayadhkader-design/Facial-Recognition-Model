@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from face_recognition.detection import DetectedFace
-from face_recognition.enrollment import enroll
+from face_recognition.enrollment import enroll, prepare_reference_image
 from face_recognition.errors import EnrollmentError
 
 
@@ -55,3 +55,11 @@ def test_enrollment_rejects_empty_identity_folder(tmp_path: Path) -> None:
 
     with pytest.raises(EnrollmentError, match="No supported images"):
         enroll(tmp_path, FakeDetector(), FakeEmbedder(), image_loader=loader)
+
+
+def test_large_reference_image_is_downscaled() -> None:
+    image = np.zeros((1600, 1200, 3), dtype=np.uint8)
+
+    resized = prepare_reference_image(image)
+
+    assert resized.shape == (800, 600, 3)

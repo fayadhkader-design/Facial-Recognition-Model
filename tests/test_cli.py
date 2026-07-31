@@ -39,4 +39,5 @@ def test_parser_uses_documented_threshold() -> None:
         ["recognize", "--image", "group.jpg", "--database", "faces.npz", "--output", "out.jpg"]
     )
 
-    assert args.threshold == 0.363
+    assert args.threshold == 0.5
+    assert args.detection_threshold == 0.9

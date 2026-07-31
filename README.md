@@ -72,6 +72,11 @@ face-recognition enroll \
   --database ./data/faces.npz
 ```
 
+Large phone photos are automatically downscaled to a consistent inference size
+before enrollment. YuNet requires a minimum detection confidence of `0.9` by
+default. If a clear face is still missed, you can cautiously adjust it with
+`--detection-threshold`; lower values may introduce false detections.
+
 Reference photos and `.npz` databases are ignored by Git. The database contains
 biometric information and should still be protected like the original photos.
 
@@ -106,9 +111,8 @@ a JSON summary:
 
 ## Choosing a threshold
 
-The default cosine threshold is `0.363`, based on OpenCV's published SFace
-guidance. Real collections differ, so calibrate it using photos that were not
-used for enrollment:
+The default cosine threshold is a conservative `0.5`. Real collections differ,
+so calibrate it using photos that were not used for enrollment:
 
 ```bash
 face-recognition recognize ... --threshold 0.45

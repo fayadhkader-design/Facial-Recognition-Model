@@ -30,7 +30,9 @@ def test_recognize_command_end_to_end_with_model_boundary_mocked(
     output_path = tmp_path / "result.png"
     assert cv.imwrite(str(input_path), np.zeros((30, 30, 3), dtype=np.uint8))
     monkeypatch.setattr(
-        cli, "build_models", lambda directory: (WorkflowDetector(), WorkflowEmbedder())
+        cli,
+        "build_models",
+        lambda directory, detection_threshold: (WorkflowDetector(), WorkflowEmbedder()),
     )
 
     exit_code = cli.main(

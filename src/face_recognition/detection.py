@@ -10,6 +10,7 @@ import cv2 as cv
 import numpy as np
 from numpy.typing import NDArray
 
+from face_recognition.config import DEFAULT_DETECTION_THRESHOLD
 from face_recognition.errors import ImageError, ModelError
 
 FaceRow = NDArray[np.float32]
@@ -43,10 +44,12 @@ class FaceDetector:
         self,
         model_path: Path,
         *,
-        confidence_threshold: float = 0.9,
+        confidence_threshold: float = DEFAULT_DETECTION_THRESHOLD,
         nms_threshold: float = 0.3,
         top_k: int = 5000,
     ) -> None:
+        if not 0.0 <= confidence_threshold <= 1.0:
+            raise ModelError("Detection threshold must be between 0 and 1")
         if not model_path.is_file():
             raise ModelError(f"Face detector model not found: {model_path}")
         try:

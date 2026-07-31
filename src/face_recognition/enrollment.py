@@ -6,6 +6,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Protocol
 
+import cv2 as cv
 import numpy as np
 
 from face_recognition.database import FaceDatabase
@@ -14,6 +15,7 @@ from face_recognition.embedding import Embedding, normalize
 from face_recognition.errors import EnrollmentError
 
 SUPPORTED_IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
+REFERENCE_MAX_DIMENSION = 800
 
 
 class Detector(Protocol):
@@ -30,6 +32,19 @@ def reference_images(identity_directory: Path) -> list[Path]:
         for path in identity_directory.iterdir()
         if path.is_file() and path.suffix.lower() in SUPPORTED_IMAGE_SUFFIXES
     )
+
+
+def prepare_reference_image(
+    image: Image, *, max_dimension: int = REFERENCE_MAX_DIMENSION
+) -> Image:
+    """Downscale large phone photos for stable YuNet detection and alignment."""
+    height, width = image.shape[:2]
+    largest_dimension = max(height, width)
+    if largest_dimension <= max_dimension:
+        return image
+    scale = max_dimension / largest_dimension
+    resized = cv.resize(image, None, fx=scale, fy=scale, interpolation=cv.INTER_AREA)
+    return np.asarray(resized, dtype=np.uint8)
 
 
 def enroll(
@@ -57,7 +72,7 @@ def enroll(
             raise EnrollmentError(f"No supported images for identity: {identity_directory.name}")
         samples: list[Embedding] = []
         for image_path in images:
-            image = image_loader(image_path)
+            image = prepare_reference_image(image_loader(image_path))
             faces = detector.detect(image)
             if len(faces) != 1:
                 raise EnrollmentError(

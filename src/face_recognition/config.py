@@ -6,7 +6,8 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 
-DEFAULT_COSINE_THRESHOLD = 0.363
+DEFAULT_COSINE_THRESHOLD = 0.5
+DEFAULT_DETECTION_THRESHOLD = 0.9
 MODEL_DIRECTORY_ENV = "FACE_RECOGNITION_MODEL_DIR"
 
 
@@ -32,4 +33,3 @@ class ModelPaths:
             detector=root / "face_detection_yunet_2023mar.onnx",
             recognizer=root / "face_recognition_sface_2021dec.onnx",
         )
-

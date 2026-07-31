@@ -9,7 +9,12 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from face_recognition import __version__
-from face_recognition.config import DEFAULT_COSINE_THRESHOLD, ModelPaths, default_model_directory
+from face_recognition.config import (
+    DEFAULT_COSINE_THRESHOLD,
+    DEFAULT_DETECTION_THRESHOLD,
+    ModelPaths,
+    default_model_directory,
+)
 from face_recognition.database import load_database, save_database
 from face_recognition.detection import FaceDetector, read_image
 from face_recognition.downloader import download_models
@@ -32,6 +37,18 @@ def add_model_directory(parser: argparse.ArgumentParser) -> None:
     )
 
 
+def add_detection_threshold(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--detection-threshold",
+        type=float,
+        default=DEFAULT_DETECTION_THRESHOLD,
+        help=(
+            "Minimum YuNet face-detection confidence "
+            f"(default: {DEFAULT_DETECTION_THRESHOLD})"
+        ),
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="face-recognition",
@@ -48,6 +65,7 @@ def build_parser() -> argparse.ArgumentParser:
     enroll_command.add_argument("--references", type=path, required=True)
     enroll_command.add_argument("--database", type=path, required=True)
     add_model_directory(enroll_command)
+    add_detection_threshold(enroll_command)
 
     recognize = commands.add_parser("recognize", help="Identify faces in a group photo")
     recognize.add_argument("--image", type=path, required=True)
@@ -60,12 +78,18 @@ def build_parser() -> argparse.ArgumentParser:
         help=f"Minimum cosine similarity (default: {DEFAULT_COSINE_THRESHOLD})",
     )
     add_model_directory(recognize)
+    add_detection_threshold(recognize)
     return parser
 
 
-def build_models(directory: Path) -> tuple[FaceDetector, FaceEmbedder]:
+def build_models(
+    directory: Path, detection_threshold: float
+) -> tuple[FaceDetector, FaceEmbedder]:
     paths = ModelPaths.in_directory(directory)
-    return FaceDetector(paths.detector), FaceEmbedder(paths.recognizer)
+    return (
+        FaceDetector(paths.detector, confidence_threshold=detection_threshold),
+        FaceEmbedder(paths.recognizer),
+    )
 
 
 def run(args: argparse.Namespace) -> dict[str, object]:
@@ -76,7 +100,7 @@ def run(args: argparse.Namespace) -> dict[str, object]:
             "models": {"detector": str(paths.detector), "recognizer": str(paths.recognizer)},
         }
 
-    detector, embedder = build_models(args.model_directory)
+    detector, embedder = build_models(args.model_directory, args.detection_threshold)
     if args.command == "enroll":
         database = enroll(args.references, detector, embedder)
         save_database(database, args.database)
@@ -113,4 +137,3 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
-
