@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Private biometric data and generated artifacts
+references/
+data/
+models/
+outputs/
+results/
+*.npz
+*.npy
+*.onnx
+
+# Images are private by default. Explicitly force-add only documented test fixtures.
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.heic
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+
